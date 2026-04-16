@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NRC Praise Team · Worship Access System</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; background: #0a0c12; }
+        
+        .bg-image {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://i.postimg.cc/9FbWwqKD/file-000000005b3071f585846bfc29e0db99.png') no-repeat center center/cover;
+            z-index: -2;
+        }
+        .glass-form {
+            width: 100%; max-width: 480px; margin: 2rem 1.5rem;
+            background: transparent;
+            position: relative; z-index: 2;
+        }
+        .logo-img { max-width: 190px; width: 100%; height: auto; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3)); display: block; margin: 0 auto; }
+        .welcome-heading { text-align: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 2.6rem; color: #FCF6E8; text-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom: 2rem; }
+        .input-field { margin-bottom: 1.6rem; position: relative; }
+        .input-field .input-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #F3E5C0; font-size: 1.1rem; }
+        .input-field input, .input-field select { width: 100%; background: rgba(20,22,35,0.65); backdrop-filter: blur(8px); border: 1px solid rgba(245,225,160,0.55); border-radius: 3rem; padding: 0.9rem 1rem 0.9rem 3rem; font-size: 1rem; color: #FFF7E8; outline: none; }
+        .toggle-pwd { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); color: #F2E3BD; cursor: pointer; }
+        .login-button, button { width: 100%; background: linear-gradient(105deg, rgba(201,164,59,0.9) 0%, rgba(233,207,130,0.95) 100%); border: 1px solid rgba(255,245,190,0.7); border-radius: 3rem; padding: 0.85rem; font-weight: 700; color: #1F1B0A; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+        button:hover { transform: scale(0.98); }
+        .link-item { font-size: 0.88rem; color: #F7E9CE; border-bottom: 1px dotted rgba(255,235,170,0.6); cursor: pointer; }
+        .links-row { display: flex; justify-content: space-between; margin: 1rem 0; flex-wrap: wrap; gap: 0.8rem; }
+        .hidden { display: none !important; }
+        select option { background: #1a1f2e; color: #FFF7E8; }
+        
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: rgba(8, 28, 51, 0.98); backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255,215,0,0.3); z-index: 1100; transition: left 0.3s ease;
+            padding: 1.5rem 0; overflow-y: auto;
+        }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,215,0,0.3); text-align: center; }
+        .sidebar-header h3 { color: #FFD966; font-family: 'Cormorant Garamond', serif; }
+        .sidebar-logo { width: 70px; margin-bottom: 10px; border-radius: 12px; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { padding: 0.8rem 1.8rem; display: flex; align-items: center; gap: 12px; color: #f0e6c5; cursor: pointer; border-left: 3px solid transparent; }
+        .sidebar-menu li i { width: 24px; color: #FFD966; }
+        .sidebar-menu li:hover { background: rgba(255,215,0,0.15); border-left-color: #FFD966; }
+        .main-content { flex: 1; padding: 20px; cursor: pointer; }
+        .top-bar { display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 60px; margin-bottom: 25px; border: 1px solid rgba(255,215,0,0.3); }
+        .top-bar-logo { height: 40px; width: auto; border-radius: 8px; }
+        .hamburger-btn { font-size: 1.6rem; background: none; border: none; color: #FFD966; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; }
+        .user-greeting { color: white; font-weight: 500; margin-left: auto; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .user-greeting img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #FFD966; cursor: pointer; }
+        .content-card { background: rgba(10,25,47,0.75); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.8rem; border: 1px solid rgba(255,215,0,0.3); color: #f0e6c5; }
+        .content-card h2 { color: #FFD966; margin-bottom: 1.2rem; font-family: 'Cormorant Garamond', serif; }
+        .btn-outline { background: transparent; border: 1px solid #FFD966; color: #FFD966; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
+        
+        /* Feed Styles */
+        .feed-post { background: rgba(0,0,0,0.4); border-radius: 20px; padding: 16px; margin-bottom: 16px; border-left: 3px solid #FFD966; }
+        .feed-post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .feed-post-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2c3e66; cursor: pointer; }
+        .feed-post-author { font-weight: 700; color: #FFD966; cursor: pointer; }
+        .feed-post-author:hover { text-decoration: underline; }
+        .feed-post-time { font-size: 11px; color: #aaa; }
+        .feed-post-content { color: white; margin-bottom: 12px; line-height: 1.4; }
+        .feed-post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,215,0,0.2); padding-top: 10px; margin-top: 8px; flex-wrap: wrap; }
+        .action-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 13px; width: auto; margin: 0; padding: 5px 10px; }
+        .action-btn:hover { color: #FFD966; transform: none; }
+        .comment-section { margin-top: 12px; padding-left: 20px; border-left: 2px solid rgba(255,215,0,0.3); }
+        .comment { font-size: 12px; color: #ddd; margin-bottom: 6px; padding: 4px; border-radius: 8px; }
+        .comment strong { cursor: pointer; color: #FFD966; }
+        .comment-input { display: flex; gap: 8px; margin-top: 8px; }
+        .comment-input input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,215,0,0.3); border-radius: 30px; padding: 8px 12px; color: white; }
+        .daily-reminder { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,0,0,0.5)); border-radius: 16px; padding: 12px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(255,215,0,0.4); }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; }
+        .modal img { max-width: 90%; max-height: 90%; border-radius: 10px; border: 3px solid #FFD966; }
+        .modal-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+        
+        /* Share Modal */
+        .share-modal { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f2e; border-radius: 20px 20px 0 0; padding: 20px; z-index: 2001; display: none; flex-direction: column; gap: 10px; }
+        .share-modal button { background: rgba(255,215,0,0.2); color: #FFD966; margin: 0; }
+        
+        /* Inbox */
+        .inbox-list { max-height: 400px; overflow-y: auto; }
+        .inbox-conversation { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px; margin-bottom: 10px; cursor: pointer; }
+        .inbox-conversation:hover { background: rgba(255,215,0,0.2); }
+        .chat-messages { max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
+        .chat-message { padding: 8px 12px; margin: 5px 0; border-radius: 18px; max-width: 80%; }
+        .chat-message.sent { background: #FFD966; color: #1a1f2e; margin-left: auto; text-align: right; }
+        .chat-message.received { background: rgba(255,255,255,0.2); color: white; }
+        
+        .executive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 1rem; margin-top: 1rem; }
+        .exec-card { background: rgba(0,0,0,0.4); border-radius: 20px; padding: 1rem; text-align: center; }
+        .exec-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #FFD966; margin-bottom: 0.5rem; cursor: pointer; }
+        .payment-status { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 30px; margin: 10px 0; }
+        .badge-paid { background: #2ecc71; padding: 4px 12px; border-radius: 30px; color: white; }
+        .badge-pending { background: #e74c3c; padding: 4px 12px; border-radius: 30px; color: white; }
+        .profile-pic-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+        footer { text-align: center; margin-top: 30px; font-size: 0.7rem; opacity: 0.7; }
+        
+        /* Candidate registration */
+        .candidate-item { background: rgba(0,0,0,0.3); padding: 10px; margin: 5px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .search-input { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,215,0,0.3); border-radius: 30px; color: white; }
+        
+        /* ID Card */
+        .id-card { width: 85.6mm; height: 54mm; background: linear-gradient(135deg, #0a1a3a 0%, #0d2b4e 100%); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); padding: 8px 12px; font-family: 'Poppins', 'Inter', sans-serif; position: relative; }
+        .id-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; border-bottom: 1px solid rgba(255,215,0,0.3); }
+        .id-logo { width: 32px; height: 32px; object-fit: contain; }
+        .id-title { font-size: 11px; font-weight: 700; color: white; }
+        .id-tagline { font-size: 7px; font-style: italic; color: #FFD966; }
+        .id-photo-area { position: absolute; top: 8px; right: 12px; }
+        .id-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #FFD966; }
+        .id-details { margin-top: 8px; margin-right: 70px; }
+        .detail-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 8px; color: #f0e6c5; }
+        .id-signatures { display: flex; justify-content: center; margin-top: 6px; border-top: 1px solid rgba(255,215,0,0.3); padding-top: 4px; }
+        .sig-box { text-align: center; width: 80%; }
+        .sig-line { border-top: 1px solid #FFD966; min-height: 24px; display: flex; align-items: center; justify-content: center; }
+        .sig-image { max-width: 100%; height: 22px; object-fit: contain; }
+        .id-qr { position: absolute; bottom: 6px; left: 12px; width: 50px; height: 50px; background: white; border-radius: 8px; padding: 4px; display: flex; align-items: center; justify-content: center; }
+        .id-qr canvas { width: 42px !important; height: 42px !important; }
+        
+        @media (max-width: 640px) { .executive-grid { grid-template-columns: 1fr 1fr; } .welcome-heading { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+<div class="bg-image"></div>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="glass-form" style="margin: 2rem auto;">
+    <div style="text-align:center;"><img class="logo-img" src="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png" alt="NRC Praise Team"></div>
+    <div class="welcome-heading">WELCOME</div>
+    <div class="input-field"><i class="fas fa-user input-icon"></i><input type="text" id="loginUsername" placeholder="Email / Username"></div>
+    <div class="input-field"><i class="fas fa-lock input-icon"></i><input type="password" id="loginPassword" placeholder="Password"><span class="toggle-pwd" id="toggleEyeBtn"><i class="far fa-eye-slash" id="eyeIconDynamic"></i></span></div>
+    <button class="login-button" id="loginActionBtn">Login</button>
+    <div class="links-row"><a id="forgotPasswordLink" class="link-item">Forgot password?</a><a id="createAccountLink" class="link-item">Create Account</a></div>
+    <div style="text-align:center;"><p style="font-family:'Cormorant Garamond'; color:#FDF1DB;">Born To Worship</p><div style="font-size:0.7rem;">©2026 NRC Praise Team</div></div>
+</div>
+
+<!-- SIGNUP, FORGOT, RESET PANELS -->
+<div id="signupPanel" class="glass-form hidden" style="max-width:480px; margin:0 auto;"><div class="welcome-heading" style="font-size:1.8rem;">Create Account</div><div id="signupWizardSteps"></div><div class="links-row" style="justify-content:center;"><a id="backToLoginFromSignup" class="link-item">← Back to Login</a></div></div>
+<div id="forgotPanel" class="glass-form hidden" style="max-width:480px; margin:0 auto;"><div class="welcome-heading" style="font-size:1.6rem;">Reset Password</div><div class="input-field"><i class="fas fa-envelope input-icon"></i><input type="email" id="resetEmailInput" placeholder="Your Email"></div><button id="sendResetCodeBtn">Send Reset Code</button><div class="links-row"><a id="backToLoginFromForgot" class="link-item">Cancel</a></div></div>
+<div id="resetCodePanel" class="glass-form hidden" style="max-width:480px; margin:0 auto;"><div class="welcome-heading" style="font-size:1.4rem;">Verification</div><div class="input-field"><i class="fas fa-key input-icon"></i><input type="text" id="resetCodeInput" placeholder="6-digit code"></div><div class="input-field"><i class="fas fa-lock input-icon"></i><input type="password" id="newPasswordReset" placeholder="New Password (min 4 chars)"></div><button id="confirmResetFinalBtn">Reset Password</button><button id="resendResetCodeBtn" class="btn-outline">Resend Code</button><a id="backToLoginFromResetCode" class="link-item" style="display:block; text-align:center;">Back</a></div>
+
+<!-- DASHBOARD -->
+<div id="dashboardWrapper" class="hidden">
+    <div class="dashboard-wrapper">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png" alt="NRC Logo" class="sidebar-logo">
+                <h3><i class="fas fa-church"></i> NRC Praise</h3>
+                <p style="font-size:0.7rem;">Worship Leaders</p>
+            </div>
+            <ul class="sidebar-menu" id="menuList">
+                <li data-view="home"><i class="fas fa-home"></i> Home</li>
+                <li data-view="inbox"><i class="fas fa-envelope"></i> Inbox</li>
+                <li data-view="rules"><i class="fas fa-gavel"></i> Rules</li>
+                <li data-view="payments"><i class="fas fa-credit-card"></i> Payments</li>
+                <li data-view="membershipId"><i class="fas fa-id-card"></i> Membership ID</li>
+                <li data-view="voting" id="votingMenuItem" class="hidden"><i class="fas fa-vote-yea"></i> Executive Voting</li>
+                <li data-view="candidateRegistration" id="candidateRegMenuItem" class="hidden"><i class="fas fa-user-plus"></i> Register Candidates</li>
+                <li data-view="executiveTeam"><i class="fas fa-users"></i> Executive Team</li>
+                <li data-view="profileSettings"><i class="fas fa-user-cog"></i> Profile Settings</li>
+                <li data-view="myRating"><i class="fas fa-star"></i> My Rating</li>
+                <li data-view="logout"><i class="fas fa-sign-out-alt"></i> Logout</li>
+            </ul>
+        </div>
+        <div class="main-content" id="mainContentArea">
+            <div class="top-bar">
+                <img src="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png" alt="NRC Praise" class="top-bar-logo">
+                <button class="hamburger-btn" id="hamburgerToggle"><i class="fas fa-bars"></i></button>
+                <div class="user-greeting" id="userGreetingClick">
+                    <img id="navUserAvatar" src="" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">
+                    <span>Welcome, <span id="userNameDisplay">Member</span></span>
+                </div>
+            </div>
+            <div id="dynamicContent" class="content-card"><h2>Loading...</h2><p>Please wait.</p></div>
+            <footer>© 2026 NRC Praise Team · Born to Worship</footer>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for profile picture -->
+<div id="imageModal" class="modal"><span class="modal-close">&times;</span><img id="modalImage" src=""></div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="share-modal">
+    <h3 style="color:#FFD966;">Share via</h3>
+    <button id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+    <button id="shareTelegram"><i class="fab fa-telegram"></i> Telegram</button>
+    <button id="shareEmail"><i class="fas fa-envelope"></i> Email</button>
+    <button id="shareFacebook"><i class="fab fa-facebook-messenger"></i> Messenger</button>
+    <button id="copyLinkBtn"><i class="fas fa-link"></i> Copy Link</button>
+    <button id="closeShareModal" class="btn-outline">Cancel</button>
+</div>
+
+<script>
+    const EMAILJS_CONFIG = { PUBLIC_KEY: "ndMajmdMx9UOcs3Zp", SERVICE_ID: "service_kdvuvwb", TEMPLATE_ID: "template_u53i5nu" };
+    emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+    async function sendRealEmail(toEmail, otpCode) { try { const res = await emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, { email: toEmail, otp: otpCode.toString() }); return res.status===200; } catch(e) { return false; } }
+    function showToast(msg, type="success") { 
+        const div = document.createElement('div'); 
+        div.style.position = 'fixed'; div.style.bottom = '20px'; div.style.left = '50%'; div.style.transform = 'translateX(-50%)';
+        div.style.background = type==="error" ? "rgba(180,40,40,0.9)" : "rgba(0,0,0,0.8)";
+        div.style.color = '#FFEFCF'; div.style.padding = '6px 18px'; div.style.borderRadius = '40px';
+        div.style.zIndex = '999'; div.style.fontSize = '0.75rem'; div.innerText = msg;
+        document.body.appendChild(div); setTimeout(()=>div.remove(),3500);
+    }
+    function generateOTP(){ return Math.floor(100000+Math.random()*900000); }
+
+    // Storage
+    let users = JSON.parse(localStorage.getItem('nrc_praise_users')) || [];
+    let posts = JSON.parse(localStorage.getItem('nrc_posts')) || [];
+    let messages = JSON.parse(localStorage.getItem('nrc_messages')) || [];
+    let candidates = JSON.parse(localStorage.getItem('nrc_candidates')) || []; // { userId, position, registeredBy, timestamp }
+    let ratingsInbox = JSON.parse(localStorage.getItem('nrc_ratings_inbox')) || [];
+    let paymentsData = JSON.parse(localStorage.getItem('nrc_payments')) || {};
+    let executiveVotingActive = localStorage.getItem('nrc_voting_active') === 'true';
+    let currentUser = null;
+    let currentSharePostId = null;
+
+    const EXECUTIVE_POSITIONS = ["Chairperson", "Vice Chairperson", "Prayer Director", "Fundraising Director", "Music Director", "Director of Publication", "Secretary", "Treasurer", "Discipline", "Social Welfare Director", "Social Welfare Directless", "Dressing Director", "Dressing Directless"];
+
+    function saveUsers() { localStorage.setItem('nrc_praise_users', JSON.stringify(users)); }
+    function savePosts() { localStorage.setItem('nrc_posts', JSON.stringify(posts)); }
+    function saveMessages() { localStorage.setItem('nrc_messages', JSON.stringify(messages)); }
+    function saveCandidates() { localStorage.setItem('nrc_candidates', JSON.stringify(candidates)); }
+    function saveRatings() { localStorage.setItem('nrc_ratings_inbox', JSON.stringify(ratingsInbox)); }
+    function savePayments() { localStorage.setItem('nrc_payments', JSON.stringify(paymentsData)); }
+    
+    function generateMemberId() {
+        let maxNum = 0;
+        users.forEach(u => { let match = u.id.match(/NRC-PT(\d+)/); if(match) maxNum = Math.max(maxNum, parseInt(match[1])); });
+        return `NRC-PT${String(maxNum + 1).padStart(3, '0')}`;
+    }
+
+    // Seed data
+    if(users.length === 0) {
+        users.push({ id: "NRC-PT001", firstName: "Test", lastName: "Member", fullname: "Test Member", email: "member@nrc.com", password: "1234", dob: "1995-05-15", whatsapp: "+265888123456", signature: "", profilePicture: "", role: "Member", position: null, verified: true });
+        users.push({ id: "NRC-PT002", firstName: "Sarah", lastName: "Mwale", fullname: "Sarah Mwale", email: "chair@nrc.com", password: "admin123", dob: "1988-02-10", whatsapp: "+265881234567", signature: "", profilePicture: "https://randomuser.me/api/portraits/women/68.jpg", role: "Executive", position: "Chairperson", verified: true });
+        users.push({ id: "NRC-PT003", firstName: "John", lastName: "Banda", fullname: "John Banda", email: "secretary@nrc.com", password: "secretary123", dob: "1990-05-20", whatsapp: "+265882345678", signature: "", profilePicture: "https://randomuser.me/api/portraits/men/32.jpg", role: "Executive", position: "Secretary", verified: true });
+        saveUsers();
+        if(posts.length === 0) {
+            posts.push({ id: "p1", authorId: "NRC-PT002", authorName: "Sarah Mwale", content: "Welcome to NRC Praise Team! Our Sunday service starts at 9am. Come worship with us!", timestamp: new Date().toLocaleString(), likes: 0, comments: [] });
+            posts.push({ id: "p2", authorId: "NRC-PT002", authorName: "Sarah Mwale", content: "Reminder: Wednesday rehearsal at 4pm. Punctuality is key!", timestamp: new Date().toLocaleString(), likes: 0, comments: [] });
+            savePosts();
+        }
+        if(Object.keys(paymentsData).length===0){ paymentsData["member@nrc.com"] = { welfare: false, registration: false }; paymentsData["chair@nrc.com"] = { welfare: true, registration: true }; savePayments(); }
+        if(ratingsInbox.length===0) ratingsInbox.push({ userId: "NRC-PT001", message: "✅ Attendance confirmed by Chairperson for Friday rehearsal", timestamp: new Date().toLocaleString(), from: "Chairperson" }); saveRatings();
+    }
+
+    function updateUserGreeting() { 
+        if(currentUser) {
+            document.getElementById('userNameDisplay').innerText = currentUser.fullname;
+            const avatarImg = document.getElementById('navUserAvatar');
+            if(avatarImg) avatarImg.src = currentUser.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg';
+        }
+        // Show/hide voting and candidate registration menu items
+        const votingItem = document.getElementById('votingMenuItem');
+        const candidateRegItem = document.getElementById('candidateRegMenuItem');
+        if(executiveVotingActive) {
+            votingItem.classList.remove('hidden');
+            if(currentUser?.position === 'Secretary') candidateRegItem.classList.remove('hidden');
+            else candidateRegItem.classList.add('hidden');
+        } else {
+            votingItem.classList.add('hidden');
+            candidateRegItem.classList.add('hidden');
+        }
+    }
+
+    function openModal(imgSrc) { document.getElementById('modalImage').src = imgSrc; document.getElementById('imageModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
+    
+    // Share function
+    function openShareModal(postId) {
+        currentSharePostId = postId;
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+    
+    function getPostLink(postId) {
+        return `${window.location.origin}${window.location.pathname}?post=${postId}`;
+    }
+    
+    function closeShareModal() { document.getElementById('shareModal').style.display = 'none'; currentSharePostId = null; }
+    
+    // Chat with user
+    function startChatWithUser(userId) {
+        const otherUser = users.find(u => u.id === userId);
+        if(!otherUser) return;
+        openChat(userId);
+    }
+    
+    function viewUserProfilePic(userId) {
+        const user = users.find(u => u.id === userId);
+        if(user && user.profilePicture) openModal(user.profilePicture);
+        else showToast("No profile picture", "error");
+    }
+    
+    // Candidate Registration (Secretary only)
+    function renderCandidateRegistration() {
+        const container = document.getElementById('dynamicContent');
+        let html = `<h2><i class="fas fa-user-plus"></i> Register Election Candidates</h2>
+                    <p>Register members for specific positions in the upcoming election.</p>
+                    <div style="margin-bottom:20px;">
+                        <input type="text" id="memberSearch" class="search-input" placeholder="🔍 Search member by name or email...">
+                        <div id="memberList" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <input type="text" id="positionSearch" class="search-input" placeholder="🔍 Search position...">
+                        <div id="positionList" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                    <div id="selectedInfo" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:12px; margin-bottom:15px;"></div>
+                    <button id="registerCandidateBtn" class="btn-gold">Register Candidate</button>
+                    <div id="registeredCandidates" style="margin-top:20px;"><h3>Registered Candidates</h3><div id="candidatesList"></div></div>`;
+        container.innerHTML = html;
+        
+        const allMembers = users.filter(u => u.id !== currentUser.id);
+        const memberSearch = document.getElementById('memberSearch');
+        const memberListDiv = document.getElementById('memberList');
+        const positionSearch = document.getElementById('positionSearch');
+        const positionListDiv = document.getElementById('positionList');
+        let selectedMember = null;
+        let selectedPosition = null;
+        
+        function renderMemberList(filter = '') {
+            const filtered = allMembers.filter(m => m.fullname.toLowerCase().includes(filter.toLowerCase()) || m.email.toLowerCase().includes(filter.toLowerCase()));
+            memberListDiv.innerHTML = filtered.map(m => `<div class="candidate-item" data-userid="${m.id}"><div><img src="${m.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" style="width:40px; height:40px; border-radius:50%;"> <strong>${m.fullname}</strong><br><small>${m.email}</small></div><button class="btn-outline select-member-btn" style="width:auto; padding:5px 15px;">Select</button></div>`).join('');
+            document.querySelectorAll('.select-member-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const item = btn.closest('.candidate-item');
+                    const userId = item.dataset.userid;
+                    selectedMember = allMembers.find(m => m.id === userId);
+                    document.getElementById('selectedInfo').innerHTML = `<span style="color:#FFD966;">Selected Member:</span> ${selectedMember.fullname}`;
+                });
+            });
+        }
+        
+        function renderPositionList(filter = '') {
+            const filtered = EXECUTIVE_POSITIONS.filter(p => p.toLowerCase().includes(filter.toLowerCase()));
+            positionListDiv.innerHTML = filtered.map(p => `<div class="candidate-item" data-pos="${p}"><span>${p}</span><button class="btn-outline select-position-btn" style="width:auto; padding:5px 15px;">Select</button></div>`).join('');
+            document.querySelectorAll('.select-position-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const item = btn.closest('.candidate-item');
+                    selectedPosition = item.dataset.pos;
+                    document.getElementById('selectedInfo').innerHTML = (selectedMember ? `<span style="color:#FFD966;">Member:</span> ${selectedMember.fullname}<br>` : '') + `<span style="color:#FFD966;">Position:</span> ${selectedPosition}`;
+                });
+            });
+        }
+        
+        memberSearch.addEventListener('input', (e) => renderMemberList(e.target.value));
+        positionSearch.addEventListener('input', (e) => renderPositionList(e.target.value));
+        renderMemberList('');
+        renderPositionList('');
+        
+        document.getElementById('registerCandidateBtn')?.addEventListener('click', () => {
+            if(!selectedMember) return showToast("Select a member", "error");
+            if(!selectedPosition) return showToast("Select a position", "error");
+            if(candidates.find(c => c.userId === selectedMember.id && c.position === selectedPosition)) return showToast("Candidate already registered for this position", "error");
+            candidates.push({ userId: selectedMember.id, memberName: selectedMember.fullname, position: selectedPosition, registeredBy: currentUser.fullname, timestamp: new Date().toLocaleString() });
+            saveCandidates();
+            showToast(`Registered ${selectedMember.fullname} for ${selectedPosition}`);
+            renderCandidateRegistration();
+        });
+        
+        // Show registered candidates
+        const candidatesListDiv = document.getElementById('candidatesList');
+        if(candidates.length === 0) candidatesListDiv.innerHTML = '<p>No candidates registered yet.</p>';
+        else candidatesListDiv.innerHTML = candidates.map(c => `<div class="candidate-item">${c.memberName} - <strong>${c.position}</strong><br><small>Registered by ${c.registeredBy} on ${c.timestamp}</small></div>`).join('');
+    }
+    
+    // Voting page (for all members when active)
+    function renderVoting() {
+        if(!executiveVotingActive) { document.getElementById('dynamicContent').innerHTML = `<h2>Voting Closed</h2><p>The chairperson has not opened the voting session.</p>`; return; }
+        if(candidates.length === 0) { document.getElementById('dynamicContent').innerHTML = `<h2>No Candidates</h2><p>The secretary hasn't registered any candidates yet.</p>`; return; }
+        
+        // Group candidates by position
+        const grouped = {};
+        candidates.forEach(c => { if(!grouped[c.position]) grouped[c.position] = []; grouped[c.position].push(c); });
+        
+        let html = `<h2><i class="fas fa-vote-yea"></i> Executive Elections</h2><p>Cast your vote for each position.</p>`;
+        for(const [position, cands] of Object.entries(grouped)) {
+            html += `<div style="margin:20px 0; padding:15px; background:rgba(0,0,0,0.3); border-radius:16px;"><h3 style="color:#FFD966;">${position}</h3>`;
+            cands.forEach(c => {
+                html += `<div style="margin:10px 0; display:flex; align-items:center; gap:10px;"><input type="radio" name="vote_${position}" value="${c.userId}"> <img src="${users.find(u=>u.id===c.userId)?.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" style="width:30px; height:30px; border-radius:50%;"> ${c.memberName}</div>`;
+            });
+            html += `</div>`;
+        }
+        html += `<button id="submitAllVotesBtn">Submit All Votes</button>`;
+        document.getElementById('dynamicContent').innerHTML = html;
+        document.getElementById('submitAllVotesBtn')?.addEventListener('click', () => showToast("Votes recorded! Thank you for voting.", "success"));
+    }
+
+    // INBOX & CHAT
+    function renderInbox() {
+        const container = document.getElementById('dynamicContent');
+        const conversations = new Map();
+        messages.forEach(msg => {
+            if(msg.to === currentUser.id || msg.from === currentUser.id) {
+                const otherId = msg.to === currentUser.id ? msg.from : msg.to;
+                if(!conversations.has(otherId)) conversations.set(otherId, []);
+                conversations.get(otherId).push(msg);
+            }
+        });
+        
+        let html = `<h2><i class="fas fa-envelope"></i> Messages</h2><div class="inbox-list">`;
+        for(let [otherId, msgs] of conversations) {
+            const otherUser = users.find(u => u.id === otherId);
+            if(otherUser) {
+                const lastMsg = msgs[msgs.length-1];
+                html += `<div class="inbox-conversation" data-user="${otherId}"><div style="display:flex; align-items:center; gap:10px;"><img src="${otherUser.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" style="width:40px; height:40px; border-radius:50%;"><div><strong>${otherUser.fullname}</strong><br><small>${lastMsg.content.substring(0,40)}...</small></div></div></div>`;
+            }
+        }
+        if(conversations.size === 0) html += `<p>No messages yet. Click on a user's name in posts to start a conversation!</p>`;
+        html += `</div><div style="margin-top:20px;"><h3>New Message</h3><select id="msgRecipient" class="btn-outline" style="width:100%; padding:8px;"><option value="">Select user</option>${users.filter(u => u.id !== currentUser.id).map(u => `<option value="${u.id}">${u.fullname}</option>`).join('')}</select><textarea id="msgContent" placeholder="Type your message..." style="width:100%; margin-top:10px; padding:10px; border-radius:20px; background:rgba(0,0,0,0.5); color:white; border:1px solid rgba(255,215,0,0.3);"></textarea><button id="sendMsgBtn">Send Message</button></div>`;
+        container.innerHTML = html;
+        
+        document.querySelectorAll('.inbox-conversation').forEach(conv => { conv.addEventListener('click', () => { openChat(conv.dataset.user); }); });
+        document.getElementById('sendMsgBtn')?.addEventListener('click', () => {
+            const toId = document.getElementById('msgRecipient').value;
+            const content = document.getElementById('msgContent').value.trim();
+            if(!toId || !content) return showToast("Select recipient and enter message", "error");
+            messages.push({ from: currentUser.id, to: toId, content: content, timestamp: new Date().toLocaleString(), read: false });
+            saveMessages();
+            showToast("Message sent");
+            document.getElementById('msgContent').value = '';
+            renderInbox();
+        });
+    }
+    
+    function openChat(otherId) {
+        const otherUser = users.find(u => u.id === otherId);
+        const chatMsgs = messages.filter(m => (m.from === currentUser.id && m.to === otherId) || (m.from === otherId && m.to === currentUser.id));
+        chatMsgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        let html = `<h2><i class="fas fa-comment"></i> Chat with ${otherUser.fullname}</h2>
+                    <div class="chat-messages" id="chatMessages">`;
+        chatMsgs.forEach(m => { html += `<div class="chat-message ${m.from === currentUser.id ? 'sent' : 'received'}">${m.content}<br><small>${m.timestamp}</small></div>`; });
+        html += `</div><div style="display:flex; gap:10px;"><input type="text" id="chatInput" placeholder="Type a message..." style="flex:1; background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:30px; padding:10px; color:white;"><button id="sendChatBtn">Send</button><button id="closeChatBtn" class="btn-outline">Back</button></div>`;
+        document.getElementById('dynamicContent').innerHTML = html;
+        
+        document.getElementById('sendChatBtn')?.addEventListener('click', () => {
+            const content = document.getElementById('chatInput').value.trim();
+            if(content) { messages.push({ from: currentUser.id, to: otherId, content: content, timestamp: new Date().toLocaleString(), read: false }); saveMessages(); openChat(otherId); }
+        });
+        document.getElementById('closeChatBtn')?.addEventListener('click', () => renderInbox());
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('sendChatBtn').click(); });
+    }
+
+    // HOMEPAGE FEED
+    function renderHome() {
+        const container = document.getElementById('dynamicContent');
+        let dailyReminders = ["🎵 Sunday Service: 9:00 AM - Come prepared", "📖 Wednesday Rehearsal: 4:00 PM sharp", "🙏 Prayer Meeting: Friday 6:00 PM", "💰 Welfare contributions due by 10th of each month"];
+        const randomReminder = dailyReminders[Math.floor(Math.random() * dailyReminders.length)];
+        
+        let postsHtml = `<div class="daily-reminder"><i class="fas fa-bell"></i> ${randomReminder}</div>`;
+        postsHtml += `<div style="margin-bottom:20px;"><textarea id="newPostContent" placeholder="Share something with the team..." style="width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); border-radius:20px; padding:12px; color:white; resize:vertical;"></textarea><button id="createPostBtn" style="margin-top:8px; width:auto; padding:8px 20px;">Post</button></div>`;
+        
+        const sortedPosts = [...posts].reverse();
+        sortedPosts.forEach(post => {
+            const postAuthor = users.find(u => u.id === post.authorId);
+            postsHtml += `
+                <div class="feed-post" data-post-id="${post.id}">
+                    <div class="feed-post-header">
+                        <img class="feed-post-avatar" src="${postAuthor?.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" onclick="openModal('${postAuthor?.profilePicture || ''}')">
+                        <div><div class="feed-post-author" onclick="showUserOptions('${post.authorId}', '${post.authorName}')">${post.authorName}</div><div class="feed-post-time">${post.timestamp}</div></div>
+                    </div>
+                    <div class="feed-post-content">${post.content}</div>
+                    <div class="feed-post-actions">
+                        <button class="action-btn like-btn" data-id="${post.id}"><i class="fas fa-heart"></i> ${post.likes || 0} Likes</button>
+                        <button class="action-btn comment-toggle-btn" data-id="${post.id}"><i class="fas fa-comment"></i> Comments (${(post.comments || []).length})</button>
+                        <button class="action-btn share-btn" data-id="${post.id}"><i class="fas fa-share-alt"></i> Share</button>
+                    </div>
+                    <div class="comment-section" id="comments-${post.id}" style="display:none;">
+                        ${(post.comments || []).map((c, idx) => `<div class="comment" data-post-id="${post.id}" data-comment-index="${idx}"><strong onclick="showUserOptions('${c.authorId || post.authorId}', '${c.author}')">${c.author}:</strong> ${c.text}<br><small>${c.time || ''}</small></div>`).join('')}
+                        <div class="comment-input"><input type="text" placeholder="Write a comment..." id="comment-input-${post.id}"><button class="add-comment-btn" data-id="${post.id}">Post</button></div>
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = postsHtml;
+        
+        document.getElementById('createPostBtn')?.addEventListener('click', () => {
+            const content = document.getElementById('newPostContent').value.trim();
+            if(!content) return showToast("Write something first", "error");
+            posts.unshift({ id: Date.now().toString(), authorId: currentUser.id, authorName: currentUser.fullname, content: content, timestamp: new Date().toLocaleString(), likes: 0, comments: [] });
+            savePosts();
+            renderHome();
+            showToast("Post published!");
+        });
+        
+        document.querySelectorAll('.like-btn').forEach(btn => { btn.addEventListener('click', () => { const post = posts.find(p => p.id === btn.dataset.id); if(post) { post.likes = (post.likes || 0) + 1; savePosts(); renderHome(); } }); });
+        document.querySelectorAll('.share-btn').forEach(btn => { btn.addEventListener('click', () => { openShareModal(btn.dataset.id); }); });
+        document.querySelectorAll('.comment-toggle-btn').forEach(btn => { btn.addEventListener('click', () => { const div = document.getElementById(`comments-${btn.dataset.id}`); if(div) div.style.display = div.style.display === 'none' ? 'block' : 'none'; }); });
+        document.querySelectorAll('.add-comment-btn').forEach(btn => { btn.addEventListener('click', () => { const postId = btn.dataset.id; const input = document.getElementById(`comment-input-${postId}`); const text = input.value.trim(); if(text) { const post = posts.find(p => p.id === postId); if(post) { post.comments = post.comments || []; post.comments.push({ author: currentUser.fullname, authorId: currentUser.id, text: text, time: new Date().toLocaleString() }); savePosts(); renderHome(); } } }); });
+    }
+    
+    function showUserOptions(userId, userName) {
+        const action = prompt(`${userName}\n\n1 - Chat with ${userName}\n2 - View Profile Picture`);
+        if(action === '1') startChatWithUser(userId);
+        else if(action === '2') viewUserProfilePic(userId);
+    }
+    window.showUserOptions = showUserOptions;
+    window.openModal = openModal;
+    window.openShareModal = openShareModal;
+
+    // MEMBERSHIP ID CARD
+    async function renderMembershipId() {
+        const container = document.getElementById('dynamicContent');
+        const dobFormatted = currentUser.dob ? new Date(currentUser.dob).toLocaleDateString('en-GB') : 'Not set';
+        const displayPosition = currentUser.role === 'Executive' ? (currentUser.position || 'Executive Member') : 'Member';
+        const qrText = `THIS IS THE MEMBER OF NRC PRAISE TEAM,${currentUser.fullname},${displayPosition},${currentUser.id}`;
+        
+        container.innerHTML = `<h2><i class="fas fa-id-card"></i> Membership ID Card</h2><div class="id-card-container"><div id="idCardForExport" class="id-card">
+            <div class="id-header"><img class="id-logo" src="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png"><div><div class="id-title">NRC PRAISE TEAM</div><div class="id-tagline">Born To Worship</div></div></div>
+            <div class="id-photo-area">${currentUser.profilePicture ? `<img class="id-photo" src="${currentUser.profilePicture}">` : `<div class="id-photo-placeholder"><i class="fas fa-user"></i></div>`}</div>
+            <div class="id-details"><div class="detail-row"><i class="fas fa-user"></i><span>Name: ${currentUser.fullname}</span></div><div class="detail-row"><i class="fas fa-id-card"></i><span>ID No: ${currentUser.id}</span></div><div class="detail-row"><i class="fas fa-briefcase"></i><span>Position: ${displayPosition}</span></div><div class="detail-row"><i class="fas fa-calendar-alt"></i><span>D.O.B: ${dobFormatted}</span></div></div>
+            <div class="id-signatures"><div class="sig-box"><div class="sig-line">${currentUser.signature ? `<img class="sig-image" src="${currentUser.signature}">` : '___________'}</div><div class="sig-label">MEMBER SIGNATURE</div></div></div>
+            <div class="id-qr" id="qrCodeContainer"></div>
+        </div></div><button id="downloadIdBtn" class="btn-gold">Download ID PDF</button>`;
+        
+        new QRCode(document.getElementById("qrCodeContainer"), { text: qrText, width: 42, height: 42 });
+        document.getElementById('downloadIdBtn')?.addEventListener('click', async () => { html2pdf().set({ margin: 0.2, filename: `NRC_ID_${currentUser.id}.pdf`, html2canvas: { scale: 3 } }).from(document.getElementById('idCardForExport')).save(); });
+    }
+
+    // PROFILE SETTINGS
+    function renderProfileSettings() {
+        const container = document.getElementById('dynamicContent');
+        container.innerHTML = `<h2><i class="fas fa-user-cog"></i> Profile Settings</h2>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="changePhotoBtn" class="btn-outline"><i class="fas fa-camera"></i> Change Profile Picture</button>
+                <button id="changeNameBtn" class="btn-outline"><i class="fas fa-user-edit"></i> Change Name</button>
+                <button id="changePasswordBtn" class="btn-outline"><i class="fas fa-lock"></i> Change Password</button>
+                <button id="changeSignatureBtn" class="btn-outline"><i class="fas fa-signature"></i> Change Signature</button>
+                <button id="deleteAccountBtn2" class="btn-outline" style="background:#c0392b; color:white;"><i class="fas fa-trash"></i> Delete Account</button>
+            </div>
+            <div id="settingsFormArea" style="margin-top:20px;"></div>`;
+        
+        document.getElementById('changePhotoBtn')?.addEventListener('click', () => {
+            document.getElementById('settingsFormArea').innerHTML = `<div><img id="previewPhoto" src="${currentUser.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" style="width:100px; height:100px; border-radius:50%;"><input type="file" id="photoUpload" accept="image/*"><button id="savePhotoBtn">Save Photo</button></div>`;
+            document.getElementById('photoUpload')?.addEventListener('change', (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = function(ev) { document.getElementById('previewPhoto').src = ev.target.result; currentUser.profilePicture = ev.target.result; saveUsers(); updateUserGreeting(); showToast("Photo updated"); }; reader.readAsDataURL(file); } });
+            document.getElementById('savePhotoBtn')?.addEventListener('click', () => renderProfileSettings());
+        });
+        document.getElementById('changeNameBtn')?.addEventListener('click', () => {
+            document.getElementById('settingsFormArea').innerHTML = `<input type="text" id="newFirstName" placeholder="First Name" value="${currentUser.firstName}" style="width:100%; padding:8px; margin-bottom:10px;"><input type="text" id="newLastName" placeholder="Last Name" value="${currentUser.lastName}" style="width:100%; padding:8px;"><button id="saveNameBtn">Save Name</button>`;
+            document.getElementById('saveNameBtn')?.addEventListener('click', () => { currentUser.firstName = document.getElementById('newFirstName').value; currentUser.lastName = document.getElementById('newLastName').value; currentUser.fullname = `${currentUser.firstName} ${currentUser.lastName}`; const idx = users.findIndex(u => u.id === currentUser.id); if(idx !== -1) users[idx] = currentUser; saveUsers(); updateUserGreeting(); showToast("Name updated"); renderProfileSettings(); });
+        });
+        document.getElementById('changePasswordBtn')?.addEventListener('click', () => {
+            document.getElementById('settingsFormArea').innerHTML = `<input type="password" id="oldPass" placeholder="Current Password" style="width:100%; padding:8px; margin-bottom:10px;"><input type="password" id="newPass" placeholder="New Password (min 4 chars)" style="width:100%; padding:8px;"><button id="savePassBtn">Change Password</button>`;
+            document.getElementById('savePassBtn')?.addEventListener('click', () => { if(currentUser.password !== document.getElementById('oldPass').value) return showToast("Current password incorrect", "error"); const newPass = document.getElementById('newPass').value; if(newPass.length < 4) return showToast("Min 4 chars", "error"); currentUser.password = newPass; const idx = users.findIndex(u => u.id === currentUser.id); if(idx !== -1) users[idx] = currentUser; saveUsers(); showToast("Password changed"); renderProfileSettings(); });
+        });
+        document.getElementById('changeSignatureBtn')?.addEventListener('click', () => {
+            document.getElementById('settingsFormArea').innerHTML = `<canvas id="sigCanvas" width="300" height="80" style="background:transparent; border:1px solid rgba(255,215,0,0.3); border-radius:12px; width:100%; height:80px;"></canvas><button id="clearSig">Clear</button><button id="saveSigBtn">Save Signature</button>`;
+            const canvas = document.getElementById('sigCanvas'), ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = "#FFD966"; ctx.lineWidth = 2; let drawing = false;
+            const getCoord = (e) => { let rect = canvas.getBoundingClientRect(); let x = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) * (canvas.width / rect.width); let y = ((e.touches ? e.touches[0].clientY : e.clientY) - rect.top) * (canvas.height / rect.height); return { x: Math.min(Math.max(x, 0), canvas.width), y: Math.min(Math.max(y, 0), canvas.height) }; };
+            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const { x, y } = getCoord(e); ctx.moveTo(x, y); });
+            canvas.addEventListener('mousemove', (e) => { if (drawing) { const { x, y } = getCoord(e); ctx.lineTo(x, y); ctx.stroke(); } });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('touchstart', (e) => { drawing = true; ctx.beginPath(); const { x, y } = getCoord(e); ctx.moveTo(x, y); });
+            canvas.addEventListener('touchmove', (e) => { if (drawing) { const { x, y } = getCoord(e); ctx.lineTo(x, y); ctx.stroke(); } });
+            canvas.addEventListener('touchend', () => drawing = false);
+            document.getElementById('clearSig')?.addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); });
+            document.getElementById('saveSigBtn')?.addEventListener('click', () => { currentUser.signature = canvas.toDataURL(); const idx = users.findIndex(u => u.id === currentUser.id); if(idx !== -1) users[idx] = currentUser; saveUsers(); showToast("Signature saved"); renderProfileSettings(); });
+        });
+        document.getElementById('deleteAccountBtn2')?.addEventListener('click', () => { if(confirm("Delete account? This cannot be undone.")) { const idx = users.findIndex(u => u.id === currentUser.id); if(idx !== -1) users.splice(idx, 1); saveUsers(); localStorage.removeItem('nrc_current_user_id'); showToast("Account deleted. Logging out..."); setTimeout(() => location.reload(), 1500); } });
+    }
+
+    function renderExecutiveTeam() {
+        const execMembers = users.filter(u => u.role === 'Executive' && u.position && EXECUTIVE_POSITIONS.includes(u.position));
+        const container = document.getElementById('dynamicContent');
+        if(execMembers.length === 0) { container.innerHTML = `<h2>Executive Leadership</h2><p>No executive members registered yet.</p>`; return; }
+        let html = `<h2>Executive Leadership (${execMembers.length})</h2><div class="executive-grid">`;
+        execMembers.forEach(m => { html += `<div class="exec-card"><img class="exec-img" src="${m.profilePicture || 'https://randomuser.me/api/portraits/lego/1.jpg'}" onclick="openModal('${m.profilePicture || ''}')"><h4>${m.fullname}</h4><p><strong>${m.position}</strong></p><a href="https://wa.me/${(m.whatsapp || '').replace(/[^0-9]/g,'')}" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a></div>`; });
+        html += `</div>`;
+        container.innerHTML = html;
+        if(currentUser?.position === 'Chairperson') {
+            const toggleBtn = document.createElement('button'); toggleBtn.className = "btn-outline"; toggleBtn.style.marginTop = "20px";
+            toggleBtn.innerText = executiveVotingActive ? "🔴 Deactivate Voting" : "🟢 Activate Executive Voting";
+            toggleBtn.onclick = () => { executiveVotingActive = !executiveVotingActive; localStorage.setItem('nrc_voting_active', executiveVotingActive); showToast(`Voting ${executiveVotingActive ? 'active' : 'inactive'}`); updateUserGreeting(); renderExecutiveTeam(); };
+            container.appendChild(toggleBtn);
+        }
+    }
+
+    function renderRules() {
+        const container = document.getElementById('dynamicContent');
+        container.innerHTML = `<h2>Official Rules</h2><div style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:1rem;"><p>1. Punctuality: Arrive 15min early.<br>2. Dress Code: Modest attire.<br>3. Attendance: Mandatory Sundays & Wednesdays.<br>4. Respect: Honour executive team.<br>5. Fees: Welfare & registration due 10th monthly.<br>6. Conduct: Excellence & humility.</p></div><button id="downloadRulesPdfBtn">Download Rules PDF</button>`;
+        document.getElementById('downloadRulesPdfBtn')?.addEventListener('click', async () => { const pdfDiv = document.createElement('div'); pdfDiv.style.padding = '20px'; pdfDiv.style.backgroundColor = '#fff'; pdfDiv.innerHTML = `<div style="display:flex; gap:15px;"><img src="https://i.postimg.cc/prhQFBY5/Photo-Room-20260414-093213.png" width="70"><div><h2>NRC PRAISE TEAM</h2><p>Official Rules</p></div></div><ul><li>Punctuality: 15min early</li><li>Dress Code: Modest</li><li>Attendance: Sunday/Wednesday</li><li>Respect & Conduct</li><li>Fees due by 10th</li></ul>`; html2pdf().set({ margin:0.5, filename:'NRC_Praise_Rules.pdf' }).from(pdfDiv).save(); });
+    }
+
+    function renderPayments() {
+        const userPay = paymentsData[currentUser.email] || { welfare: false, registration: false };
+        const container = document.getElementById('dynamicContent');
+        container.innerHTML = `<h2>Payments</h2><div class="payment-status"><span>Social Welfare (MWK 5,000)</span><span class="${userPay.welfare ? 'badge-paid' : 'badge-pending'}">${userPay.welfare ? 'Paid' : 'Pending'}</span></div><div class="payment-status"><span>Registration Fee (MWK 3,000)</span><span class="${userPay.registration ? 'badge-paid' : 'badge-pending'}">${userPay.registration ? 'Paid' : 'Pending'}</span></div><button id="payWelfare" class="btn-outline">Simulate Welfare Payment</button><button id="payReg" class="btn-outline">Simulate Registration</button>`;
+        document.getElementById('payWelfare')?.addEventListener('click',()=>{ paymentsData[currentUser.email] = {...userPay, welfare:true}; savePayments(); renderPayments(); showToast("Welfare paid"); });
+        document.getElementById('payReg')?.addEventListener('click',()=>{ paymentsData[currentUser.email] = {...userPay, registration:true}; savePayments(); renderPayments(); showToast("Registration paid"); });
+    }
+
+    function renderMyRating() {
+        const msgs = ratingsInbox.filter(r => r.userId === currentUser.id);
+        const container = document.getElementById('dynamicContent');
+        if (!msgs.length) container.innerHTML = `<h2>My Ratings</h2><p>No attendance confirmations yet.</p>`;
+        else container.innerHTML = `<h2>My Rating Inbox</h2>${msgs.map(m => `<div class="rating-message"><i class="fas fa-check-circle"></i> <strong>${m.from}</strong> · ${m.timestamp}<br>📢 ${m.message}</div>`).join('')}`;
+    }
+    
+    function logout() { localStorage.removeItem('nrc_current_user_id'); currentUser = null; document.getElementById('dashboardWrapper').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); showToast("Logged out"); }
+    
+    const views = { home: renderHome, inbox: renderInbox, rules: renderRules, payments: renderPayments, membershipId: renderMembershipId, voting: renderVoting, candidateRegistration: renderCandidateRegistration, executiveTeam: renderExecutiveTeam, profileSettings: renderProfileSettings, myRating: renderMyRating, logout: logout };
+    function navigateTo(view) { if (view === 'logout') logout(); else if (views[view]) views[view](); else renderHome(); }
+    
+    document.querySelectorAll('#menuList li').forEach(li => { li.addEventListener('click', () => { const view = li.getAttribute('data-view'); if (view) navigateTo(view); document.getElementById('sidebar').classList.remove('open'); }); });
+    document.getElementById('hamburgerToggle')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('sidebar').classList.toggle('open'); });
+    // Close sidebar when clicking on main content area
+    document.getElementById('mainContentArea')?.addEventListener('click', () => { document.getElementById('sidebar').classList.remove('open'); });
+    document.getElementById('userGreetingClick')?.addEventListener('click', () => { navigateTo('home'); document.getElementById('sidebar').classList.remove('open'); });
+    
+    // Share modal handlers
+    document.getElementById('closeShareModal')?.addEventListener('click', closeShareModal);
+    document.getElementById('shareWhatsApp')?.addEventListener('click', () => { if(currentSharePostId) window.open(`https://wa.me/?text=${encodeURIComponent(getPostLink(currentSharePostId))}`, '_blank'); closeShareModal(); });
+    document.getElementById('shareTelegram')?.addEventListener('click', () => { if(currentSharePostId) window.open(`https://t.me/share/url?url=${encodeURIComponent(getPostLink(currentSharePostId))}`, '_blank'); closeShareModal(); });
+    document.getElementById('shareEmail')?.addEventListener('click', () => { if(currentSharePostId) window.location.href = `mailto:?subject=Check this post&body=${encodeURIComponent(getPostLink(currentSharePostId))}`; closeShareModal(); });
+    document.getElementById('shareFacebook')?.addEventListener('click', () => { if(currentSharePostId) window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(getPostLink(currentSharePostId))}&app_id=0`, '_blank'); closeShareModal(); });
+    document.getElementById('copyLinkBtn')?.addEventListener('click', () => { if(currentSharePostId) { navigator.clipboard.writeText(getPostLink(currentSharePostId)); showToast("Link copied to clipboard!"); } closeShareModal(); });
+    
+    // Modal close
+    document.querySelector('.modal-close')?.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => { if(e.target === document.getElementById('imageModal')) closeModal(); if(e.target === document.getElementById('shareModal')) closeShareModal(); });
+    
+    // Login logic
+    const loginUsername = document.getElementById('loginUsername'), loginPassword = document.getElementById('loginPassword');
+    let autoTimeout = null;
+    function attemptLogin() {
+        if (autoTimeout) clearTimeout(autoTimeout);
+        autoTimeout = setTimeout(() => {
+            const identifier = loginUsername.value.trim(), pwd = loginPassword.value;
+            if (!identifier || !pwd) return;
+            const user = users.find(u => (u.email === identifier || u.fullname === identifier) && u.password === pwd && u.verified === true);
+            if (user) { currentUser = user; localStorage.setItem('nrc_current_user_id', user.id); document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashboardWrapper').classList.remove('hidden'); updateUserGreeting(); navigateTo('home'); showToast(`Welcome ${user.fullname}`); }
+        }, 500);
+    }
+    loginUsername.addEventListener('input', attemptLogin);
+    loginPassword.addEventListener('input', attemptLogin);
+    document.getElementById('loginActionBtn').addEventListener('click', () => {
+        const identifier = loginUsername.value.trim(), pwd = loginPassword.value;
+        const user = users.find(u => (u.email === identifier || u.fullname === identifier) && u.password === pwd && u.verified === true);
+        if (user) { currentUser = user; localStorage.setItem('nrc_current_user_id', user.id); document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashboardWrapper').classList.remove('hidden'); updateUserGreeting(); navigateTo('home'); } else showToast("Invalid credentials", "error");
+    });
+    
+    const toggleBtn = document.getElementById('toggleEyeBtn'), eyeIcon = document.getElementById('eyeIconDynamic');
+    toggleBtn.addEventListener('click', () => { const type = loginPassword.getAttribute('type'); if (type === 'password') { loginPassword.setAttribute('type', 'text'); eyeIcon.classList.remove('fa-eye-slash'); eyeIcon.classList.add('fa-eye'); } else { loginPassword.setAttribute('type', 'password'); eyeIcon.classList.remove('fa-eye'); eyeIcon.classList.add('fa-eye-slash'); } });
+    
+    // SIGNUP WIZARD (simplified)
+    let signupTemp = { firstName: "", lastName: "", email: "", password: "", dob: "", whatsapp: "", role: "Member", position: "", signature: "", profilePicture: "" }, signupStep = 0, stepsList = ["First Name", "Last Name", "Email", "Password", "Date of Birth", "WhatsApp", "Role", "Select Position (if Executive)", "Upload Photo", "Signature"];
+    let pendingSignupData = null;
+    
+    function renderSignupStep() {
+        const container = document.getElementById('signupWizardSteps');
+        let html = `<div><small>Step ${signupStep + 1}/${stepsList.length}</small><progress value="${signupStep + 1}" max="${stepsList.length}"></progress></div>`;
+        if (signupStep === 0) html += `<input id="sigFirstName" placeholder="First Name" style="width:100%; padding:12px; border-radius:40px;">`;
+        else if (signupStep === 1) html += `<input id="sigLastName" placeholder="Surname" style="width:100%; padding:12px;">`;
+        else if (signupStep === 2) html += `<input id="sigEmail" placeholder="Email" style="width:100%; padding:12px;">`;
+        else if (signupStep === 3) html += `<input id="sigPass" type="password" placeholder="Password (min 4)" style="width:100%; padding:12px;">`;
+        else if (signupStep === 4) html += `<input id="sigDob" type="date" style="width:100%; padding:12px;">`;
+        else if (signupStep === 5) html += `<input id="sigWhatsapp" placeholder="WhatsApp number" style="width:100%; padding:12px;">`;
+        else if (signupStep === 6) html += `<select id="sigRole" style="width:100%; padding:12px;"><option value="Member">Member</option><option value="Executive">Executive</option></select>`;
+        else if (signupStep === 7) {
+            if (signupTemp.role === 'Executive') {
+                html += `<label style="color:#FFD966;">Select Executive Position:</label><select id="positionSelect" style="width:100%; padding:12px; border-radius:40px;">`;
+                EXECUTIVE_POSITIONS.forEach(pos => { html += `<option value="${pos}">${pos}</option>`; });
+                html += `</select>`;
+            } else { html += `<p>No position needed for Member role.</p><input type="hidden" id="positionSelect">`; }
+        }
+        else if (signupStep === 8) html += `<div><img id="photoPreview" src="https://randomuser.me/api/portraits/lego/1.jpg" style="width:100px; height:100px; border-radius:50%;"><br><input type="file" id="photoUploadSignup" accept="image/*"><br><small>Upload profile photo (optional)</small></div>`;
+        else if (signupStep === 9) html += `<canvas id="signCanvas" width="400" height="100" style="width:100%; height:100px; background:transparent; border:1px solid rgba(255,215,0,0.3); border-radius:16px;"></canvas><button id="clearSigCanvas" class="btn-outline">Clear</button>`;
+        html += `<div style="display:flex; gap:12px; margin-top:20px;"><button id="signupPrevBtn" ${signupStep === 0 ? 'disabled' : ''}>Back</button><button id="signupNextBtn">${signupStep === 9 ? 'Submit & Verify' : 'Next'}</button></div>`;
+        container.innerHTML = html;
+        
+        if (signupStep === 7 && signupTemp.role === 'Executive') { document.getElementById('positionSelect')?.addEventListener('change', (e) => { signupTemp.position = e.target.value; }); }
+        if (signupStep === 8) { document.getElementById('photoUploadSignup')?.addEventListener('change', (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = function(ev) { document.getElementById('photoPreview').src = ev.target.result; signupTemp.profilePicture = ev.target.result; }; reader.readAsDataURL(file); } }); }
+        if (signupStep === 9) { const canvas = document.getElementById('signCanvas'), ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = "#FFD966"; ctx.lineWidth = 2; let drawing = false; const getC = (e) => { let rect = canvas.getBoundingClientRect(); let x = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) * (canvas.width / rect.width); let y = ((e.touches ? e.touches[0].clientY : e.clientY) - rect.top) * (canvas.height / rect.height); return { x: Math.min(Math.max(x, 0), canvas.width), y: Math.min(Math.max(y, 0), canvas.height) }; }; canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const { x, y } = getC(e); ctx.moveTo(x, y); }); canvas.addEventListener('mousemove', (e) => { if (drawing) { const { x, y } = getC(e); ctx.lineTo(x, y); ctx.stroke(); } }); canvas.addEventListener('mouseup', () => drawing = false); canvas.addEventListener('touchstart', (e) => { drawing = true; ctx.beginPath(); const { x, y } = getC(e); ctx.moveTo(x, y); }); canvas.addEventListener('touchmove', (e) => { if (drawing) { const { x, y } = getC(e); ctx.lineTo(x, y); ctx.stroke(); } }); canvas.addEventListener('touchend', () => drawing = false); document.getElementById('clearSigCanvas').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signupTemp.signature = ''; }; }
+        
+        document.getElementById('signupNextBtn')?.addEventListener('click', async () => {
+            if (signupStep === 0) { let v = document.getElementById('sigFirstName')?.value; if (!v) return showToast("First name required", "error"); signupTemp.firstName = v; }
+            if (signupStep === 1) { let v = document.getElementById('sigLastName')?.value; if (!v) return showToast("Surname required", "error"); signupTemp.lastName = v; }
+            if (signupStep === 2) { let v = document.getElementById('sigEmail')?.value; if (!v.includes('@')) return showToast("Valid email", "error"); signupTemp.email = v; }
+            if (signupStep === 3) { let v = document.getElementById('sigPass')?.value; if (v.length < 4) return showToast("Min 4 chars", "error"); signupTemp.password = v; }
+            if (signupStep === 4) { let v = document.getElementById('sigDob')?.value; if (!v) return showToast("DOB required", "error"); signupTemp.dob = v; }
+            if (signupStep === 5) { let v = document.getElementById('sigWhatsapp')?.value; if (!v) return showToast("WhatsApp required", "error"); signupTemp.whatsapp = v; }
+            if (signupStep === 6) { signupTemp.role = document.getElementById('sigRole').value; }
+            if (signupStep === 7 && signupTemp.role === 'Executive') { const selectedPos = document.getElementById('positionSelect')?.value; if (!selectedPos) return showToast("Select position", "error"); signupTemp.position = selectedPos; }
+            if (signupStep === 9) { const canvas = document.getElementById('signCanvas'); if (canvas) signupTemp.signature = canvas.toDataURL(); }
+            if (signupStep === 9) {
+                if (users.find(u => u.email === signupTemp.email)) return showToast("Email exists", "error");
+                const otp = generateOTP(); const sent = await sendRealEmail(signupTemp.email, otp);
+                if (!sent) return showToast("Email send failed", "error");
+                const fullname = `${signupTemp.firstName} ${signupTemp.lastName}`;
+                pendingSignupData = { ...signupTemp, fullname, verifyCode: otp.toString(), verified: false, id: generateMemberId() };
+                const overlay = document.createElement('div'); overlay.className = 'glass-form'; overlay.style.position = 'fixed'; overlay.style.top = '50%'; overlay.style.left = '50%'; overlay.style.transform = 'translate(-50%,-50%)'; overlay.style.background = 'rgba(0,0,0,0.95)'; overlay.style.padding = '2rem'; overlay.style.borderRadius = '2rem'; overlay.style.zIndex = '2000';
+                overlay.innerHTML = `<div class="welcome-heading" style="font-size:1.4rem;">Verify Email</div><input type="text" id="verifyPopupCode" placeholder="6-digit code" style="width:100%; padding:12px; border-radius:40px;"><button id="verifyPopupBtn">Verify</button><button id="resendPopupCode" class="btn-outline">Resend</button><button id="cancelPopupBtn">Cancel</button>`;
+                document.body.appendChild(overlay);
+                const codeInp = document.getElementById('verifyPopupCode');
+                const autoVerify = async () => { if (codeInp.value.length === 6 && pendingSignupData && codeInp.value === pendingSignupData.verifyCode) { const newUser = { ...pendingSignupData, verified: true }; delete newUser.verifyCode; users.push(newUser); saveUsers(); showToast("Account created! Please login", "success"); overlay.remove(); document.getElementById('signupPanel').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); pendingSignupData = null; } else if (codeInp.value.length === 6) showToast("Wrong code", "error"); };
+                codeInp.addEventListener('input', autoVerify);
+                document.getElementById('verifyPopupBtn').addEventListener('click', autoVerify);
+                document.getElementById('resendPopupCode').addEventListener('click', async () => { if (pendingSignupData) { const newOtp = generateOTP(); await sendRealEmail(pendingSignupData.email, newOtp); pendingSignupData.verifyCode = newOtp.toString(); showToast("New code sent"); } });
+                document.getElementById('cancelPopupBtn').addEventListener('click', () => { overlay.remove(); pendingSignupData = null; });
+            } else { signupStep++; renderSignupStep(); }
+        });
+        document.getElementById('signupPrevBtn')?.addEventListener('click', () => { if (signupStep > 0) { signupStep--; renderSignupStep(); } });
+    }
+    
+    document.getElementById('createAccountLink').addEventListener('click', () => { signupStep = 0; signupTemp = { firstName: "", lastName: "", email: "", password: "", dob: "", whatsapp: "", role: "Member", position: "", signature: "", profilePicture: "" }; renderSignupStep(); document.getElementById('loginSection').classList.add('hidden'); document.getElementById('signupPanel').classList.remove('hidden'); });
+    document.getElementById('backToLoginFromSignup').addEventListener('click', () => { document.getElementById('signupPanel').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); });
+    
+    // Forgot password
+    let resetEmailGlobal = null, resetStoredCode = null;
+    document.getElementById('forgotPasswordLink').addEventListener('click', () => { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('forgotPanel').classList.remove('hidden'); });
+    document.getElementById('backToLoginFromForgot').addEventListener('click', () => { document.getElementById('forgotPanel').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); });
+    document.getElementById('sendResetCodeBtn').addEventListener('click', async () => { const email = document.getElementById('resetEmailInput').value.trim(); const user = users.find(u => u.email === email); if (!user) return showToast("Email not registered", "error"); resetEmailGlobal = email; resetStoredCode = generateOTP(); const sent = await sendRealEmail(email, resetStoredCode); if (sent) { document.getElementById('forgotPanel').classList.add('hidden'); document.getElementById('resetCodePanel').classList.remove('hidden'); } });
+    const resetCodeInput = document.getElementById('resetCodeInput'), newPwdReset = document.getElementById('newPasswordReset');
+    function attemptReset() { const code = resetCodeInput.value.trim(), newPwd = newPwdReset.value; if (code.length === 6 && newPwd.length >= 4 && resetStoredCode && code === resetStoredCode.toString()) { const idx = users.findIndex(u => u.email === resetEmailGlobal); if (idx !== -1) { users[idx].password = newPwd; saveUsers(); showToast("Password reset!", "success"); } document.getElementById('resetCodePanel').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); resetCodeInput.value = ""; newPwdReset.value = ""; } else if (code.length === 6) showToast("Invalid code", "error"); }
+    resetCodeInput.addEventListener('input', attemptReset); newPwdReset.addEventListener('input', attemptReset); document.getElementById('confirmResetFinalBtn').addEventListener('click', attemptReset);
+    document.getElementById('resendResetCodeBtn').addEventListener('click', async () => { if (resetEmailGlobal) { resetStoredCode = generateOTP(); await sendRealEmail(resetEmailGlobal, resetStoredCode); } });
+    document.getElementById('backToLoginFromResetCode').addEventListener('click', () => { document.getElementById('resetCodePanel').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); });
+    
+    const storedId = localStorage.getItem('nrc_current_user_id');
+    if (storedId) { currentUser = users.find(u => u.id === storedId); if (currentUser && currentUser.verified) { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashboardWrapper').classList.remove('hidden'); updateUserGreeting(); navigateTo('home'); } }
+</script>
+</body>
+</html>
